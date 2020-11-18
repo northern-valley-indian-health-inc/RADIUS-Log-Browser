@@ -53,39 +53,43 @@ namespace Radius_Log_Browser
 
             foreach (var events in doc.Descendants("Event"))
             {
-                classID = events.Element("Class").Value;
-
-
-                if (requests.ContainsKey(classID))
+                try
                 {
-                    requests[classID].setResponce(events);
-
-                    ListViewItem item = new ListViewItem(new string[]
+                    classID = events.Element("Class").Value;
+                    if (requests.ContainsKey(classID))
                     {
-                        requests[classID].timestamp,
-                        requests[classID].getRequestType(),
-                        requests[classID].server,
-                        requests[classID].accessPointIP,
-                        requests[classID].accessPointName,
-                        requests[classID].requesterMacAddress,
-                        requests[classID].samAccountName,
-                        requests[classID].getResponceType(),
-                        requests[classID].getReason()
-                    });
+                        requests[classID].setResponce(events);
 
-                    item.BackColor = requests[classID].getRowColor();
+                        ListViewItem item = new ListViewItem(new string[]
+                        {
+                            requests[classID].timestamp,
+                            requests[classID].getRequestType(),
+                            requests[classID].server,
+                            requests[classID].accessPointIP,
+                            requests[classID].accessPointName,
+                            requests[classID].requesterMacAddress,
+                            requests[classID].samAccountName,
+                            requests[classID].getResponceType(),
+                            requests[classID].getReason()
+                        });
 
-                    this.Invoke(new MethodInvoker(delegate { lvLogTable.Items.Add(item); }));
-                    if (cbScroll.Checked)
+                        item.BackColor = requests[classID].getRowColor();
+
+                        this.Invoke(new MethodInvoker(delegate { lvLogTable.Items.Add(item); }));
+                        if (cbScroll.Checked)
+                        {
+                            this.Invoke(new MethodInvoker(delegate { lvLogTable.Items[lvLogTable.Items.Count - 1].EnsureVisible(); }));
+                        }                    
+                    }
+                    else
                     {
-                        this.Invoke(new MethodInvoker(delegate { lvLogTable.Items[lvLogTable.Items.Count - 1].EnsureVisible(); }));
-                    }                    
+                        requests[classID] = new RadiusRequest(events);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    requests[classID] = new RadiusRequest(events);
+                    continue;
                 }
-                    
             }
         }
 
